@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="testidp-test-suite.xml" />
+	<munit:test name="testidp-test-suite-testidpFlowTest" doc:id="f887aa99-4d33-4842-a97f-ae5ebd77d04c" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d89ecaf5-268e-410a-82fd-ed719ba1f329" processor="idp-test-idp-100:postdocumentactionexecution">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="31160b7a-7415-4b38-8d30-3fbf766e621e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="200 OK" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="7fae18c9-3ca3-42e5-9c27-89ab9c4c3810" >
+				<munit:payload value="200 OK" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to testidpFlow" doc:id="18083490-4dd7-461b-a3bc-2b71adb15a12" name="testidpFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="0763a91a-9b6f-455f-af63-02bbd37c70be" />
+		</munit:validation>
+	</munit:test>
+
+</mule>

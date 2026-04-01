@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:idp-test-idp-100="http://www.mulesoft.org/schema/mule/idp-test-idp-100"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/idp-test-idp-100 http://www.mulesoft.org/schema/mule/idp-test-idp-100/current/mule-idp-test-idp-100.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<idp-test-idp-100:config name="IDP___testIDP___1_0_0_Config" doc:name="IDP - testIDP - 1.0.0 Config" doc:id="f6449aca-0025-4495-b96f-279a38b65c12" property_host="idp-rt.us-east-1.anypoint.mulesoft.com" property_port="443" property_protocol="HTTPS" property_client-id="XXXXXXXXX" property_client-secret="XXXXXXXXXX" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3f42e1d6-2493-47dd-8c59-537992701fa5" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="testidpFlow" doc:id="3112e9f5-f623-4036-b4c0-c1cd3c927902" >
+		<http:listener doc:name="Listener" doc:id="e585e62e-1f68-4987-ad4e-9d918d3f4d41" config-ref="HTTP_Listener_config" path="/test"/>
+		<ee:transform doc:name="Build IDP Request" doc:id="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import toBase64 from dw::core::Binaries
+output application/java
+var apiKey = toBase64("0dacdedb7e8e4f7ca601c9c6b17a4fed:14EB7310cA4b44fdb3b6fdE2A591b9cC" as Binary)
+var incomingFile = payload.parts.file
+var fileName = incomingFile.headers.'Content-Disposition'.filename default "document.pdf"
+---
+{
+   parts : {
+   	 callback : {
+           content : '{"noAuthUrl": "https://secretsmanager-1mt31c.iu16bg.deu-c1.cloudhub.io/test?apikey=' ++ apiKey ++ '"}'
+       },
+       file : {
+           headers : {
+               "Content-Disposition" : {
+                   "name": "file",
+                   "filename": fileName,
+                   "subtype": "form-data"
+                   },
+               "Content-Type" : incomingFile.headers.'Content-Type' default "application/pdf"
+               },
+           content : incomingFile.content
+           }
+       }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<idp-test-idp-100:postdocumentactionexecution doc:name="postDocumentActionExecution" doc:id="31160b7a-7415-4b38-8d30-3fbf766e621e" config-ref="IDP___testIDP___1_0_0_Config">
+			<idp-test-idp-100:postdocumentactionexecution-request-data><![CDATA[#[payload]]]></idp-test-idp-100:postdocumentactionexecution-request-data>
+		</idp-test-idp-100:postdocumentactionexecution>
+	</flow>
+</mule>
